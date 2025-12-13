@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mod-devel-cli"
+dynamic = ["version"]
+description = "MOD Command Line Interface"
+authors = [
+    {name = "Alex Cunha", email = "alex@mod.audio"}
+]
+license = {text = "Proprietary"}
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Homepage = "https://mod.audio/"
+
+[project.scripts]
+modcli = "modcli.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "modcli.__version__"}

@@ -2,10 +2,14 @@
 
 ## Installation
 
-Run:
+Using pip:
 
-    pip3 install git+https://github.com/moddevices/mod-devel-cli
-    
+    pip install git+https://github.com/moddevices/mod-devel-cli
+
+Using uv:
+
+    uv tool install git+https://github.com/moddevices/mod-devel-cli
+
 ## Usage
 
 ```

@@ -5,10 +5,8 @@ import tempfile
 from hashlib import md5
 
 import click
-import crayons
-import requests
 
-from modcli import context
+from modcli import context, http
 from modcli.utils import read_json_file
 
 
@@ -32,7 +30,7 @@ def publish(project_file: str, packages_path: str, keep_environment: bool=False,
 
     project = os.path.split(project_file)[1]
     if not force and not click.confirm('Project {0} will be compiled and published in [{1}], '
-                                       'do you confirm?'.format(crayons.green(project), crayons.green(env.name))):
+                                       'do you confirm?'.format(click.style(project, fg='green'), click.style(env.name, fg='green'))):
         raise Exception('Cancelled')
 
     process = read_json_file(project_file)
@@ -75,7 +73,7 @@ def publish(project_file: str, packages_path: str, keep_environment: bool=False,
 
         headers = {'Authorization': 'MOD {0}'.format(env.token)}
 
-        result = requests.post('{0}/'.format(env.bundle_url), json=process, headers=headers)
+        result = http.post('{0}/'.format(env.bundle_url), json_data=process, headers=headers)
         if result.status_code == 401:
             raise Exception('Invalid token - please authenticate (see \'modcli auth\')')
         elif result.status_code != 200:
@@ -87,7 +85,7 @@ def publish(project_file: str, packages_path: str, keep_environment: bool=False,
         with open(source_path, 'rb') as fh:
             data = fh.read()
         headers = {'Content-Type': 'application/octet-stream'}
-        result = requests.post(release_process['source-href'], data=data, headers=headers)
+        result = http.post(release_process['source-href'], data=data, headers=headers)
         if result.status_code == 401:
             raise Exception('Invalid token - please authenticate (see \'modcli auth\')')
         elif result.status_code != 201:
@@ -104,11 +102,11 @@ def publish(project_file: str, packages_path: str, keep_environment: bool=False,
         shutil.rmtree(work_dir, ignore_errors=True)
 
     release_process_url = release_process['href']
-    click.echo(crayons.blue('Process url: {0}?pretty=true'.format(release_process_url)))
-    click.echo(crayons.green('Done'))
+    click.echo(click.style('Process url: {0}?pretty=true'.format(release_process_url), fg='blue'))
+    click.echo(click.style('Done', fg='green'))
     if show_result:
         click.echo('Retrieving release process from {0} ...'.format(release_process_url))
-        release_process_full = requests.get('{0}?pretty=true'.format(release_process_url)).text
-        click.echo(crayons.blue('================ Release Process {0} ================'.format(release_process['id'])))
+        release_process_full = http.get('{0}?pretty=true'.format(release_process_url)).text
+        click.echo(click.style('================ Release Process {0} ================'.format(release_process['id']), fg='blue'))
         click.echo(release_process_full)
-        click.echo(crayons.blue('================ End Release Process ================'))
+        click.echo(click.style('================ End Release Process ================', fg='blue'))

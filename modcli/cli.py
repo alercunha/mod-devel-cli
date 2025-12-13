@@ -1,5 +1,4 @@
 import click
-import crayons
 
 from modcli import context, auth, __version__, bundle
 
@@ -51,7 +50,7 @@ def login_sso(show_token: bool, one_time: bool, confirm_all: bool, detached_mode
         else:
             token = auth.login_sso(env.api_url)
     except Exception as ex:
-        click.echo(crayons.red(str(ex)), err=True)
+        click.echo(click.style(str(ex), fg='red'), err=True)
         exit(1)
         return
 
@@ -62,7 +61,7 @@ def login_sso(show_token: bool, one_time: bool, confirm_all: bool, detached_mode
     if show_token or one_time:
         print(token.strip())
     else:
-        click.echo(crayons.green('You\'re now logged in as [{0}] in [{1}].'.format(env.username, env.name)))
+        click.echo(click.style('You\'re now logged in as [{0}] in [{1}].'.format(env.username, env.name), fg='green'))
 
 
 @click.command(help='Authenticate user')
@@ -80,7 +79,7 @@ def login(username: str, password: str, show_token: bool, one_time: bool, env_na
     try:
         token = auth.login(username, password, env.api_url)
     except Exception as ex:
-        click.echo(crayons.red(str(ex)), err=True)
+        click.echo(click.style(str(ex), fg='red'), err=True)
         exit(1)
         return
 
@@ -91,7 +90,7 @@ def login(username: str, password: str, show_token: bool, one_time: bool, env_na
     if show_token or one_time:
         print(token.strip())
     else:
-        click.echo(crayons.green('You\'re now logged in as [{0}] in [{1}].'.format(username, env.name)))
+        click.echo(click.style('You\'re now logged in as [{0}] in [{1}].'.format(username, env.name), fg='green'))
 
 
 @click.command(help='Remove all tokens and reset context data')
@@ -99,10 +98,10 @@ def clear_context():
     try:
         context.clear()
     except Exception as ex:
-        click.echo(crayons.red(str(ex)), err=True)
+        click.echo(click.style(str(ex), fg='red'), err=True)
         exit(1)
         return
-    click.echo(crayons.green('Context cleared'))
+    click.echo(click.style('Context cleared', fg='green'))
 
 
 @click.command(help='Show current active access JWT token')
@@ -112,7 +111,7 @@ def active_token(env_name: str):
         context.set_active_env(env_name)
     token = context.active_token()
     if not token:
-        click.echo(crayons.red('You must authenticate first.'), err=True)
+        click.echo(click.style('You must authenticate first.', fg='red'), err=True)
         click.echo('Try:\n $ modcli auth login')
         exit(1)
         return
@@ -127,11 +126,11 @@ def set_active_env(env_name: str):
         context.set_active_env(env_name)
         context.save()
     except Exception as ex:
-        click.echo(crayons.red(str(ex)), err=True)
+        click.echo(click.style(str(ex), fg='red'), err=True)
         exit(1)
         return
 
-    click.echo(crayons.green('Current environment set to: {0}'.format(env_name)))
+    click.echo(click.style('Current environment set to: {0}'.format(env_name), fg='green'))
 
 
 @click.command(help='Add new environment, where ENV_NAME is the name, API_URL '
@@ -145,11 +144,11 @@ def add_env(env_name: str, api_url: str, bundle_url: str):
         context.set_active_env(env_name)
         context.save()
     except Exception as ex:
-        click.echo(crayons.red(str(ex)), err=True)
+        click.echo(click.style(str(ex), fg='red'), err=True)
         exit(1)
         return
 
-    click.echo(crayons.green('Environment [{0}] added and set as active'.format(env_name)))
+    click.echo(click.style('Environment [{0}] added and set as active'.format(env_name), fg='green'))
 
 
 @click.command(help='List current configuration', name='list')
@@ -174,7 +173,7 @@ def publish(project_file: str, packages_path: str, show_result: bool, keep_envir
         bundle.publish(project_file, packages_path, show_result=show_result,
                        keep_environment=keep_environment, rebuild=rebuild, env_name=env, force=force)
     except Exception as ex:
-        click.echo(crayons.red(str(ex)), err=True)
+        click.echo(click.style(str(ex), fg='red'), err=True)
         exit(1)
         return
 
