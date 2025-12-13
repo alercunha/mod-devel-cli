@@ -1,17 +1,16 @@
 import socket
-import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib import parse
 
 import click
-import requests
 from click import Abort
 
 from modcli import __version__
+from modcli import http
 
 
 def login(username: str, password: str, api_url: str):
-    result = requests.post('{0}/users/tokens'.format(api_url), json={
+    result = http.post('{0}/users/tokens'.format(api_url), json_data={
         'user_id': username,
         'password': password,
         'agent': 'modcli:{0}'.format(__version__),
@@ -80,7 +79,8 @@ def login_sso(api_url: str):
     httpd = HTTPServer((server_host, server_port), SSORequestHandler)
     httpd.timeout = 30
 
-    webbrowser.open('{0}/users/tokens_sso?local_url={1}'.format(api_url, local_server))
+    click.echo('Open this URL in your browser to authenticate:')
+    click.echo('{0}/users/tokens_sso?local_url={1}'.format(api_url, local_server))
 
     try:
         httpd.handle_request()

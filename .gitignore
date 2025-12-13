@@ -8,4 +8,5 @@ build/
 dist/
 *.egg-info/
 *.egg
-Pipfile.lock
+
+.venv/
