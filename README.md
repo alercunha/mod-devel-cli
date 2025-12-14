@@ -2,9 +2,10 @@
 
 ## Installation
 
-Using pip3:
+Using pip:
 
-    pip3 install git+https://github.com/mod-audio/mod-devel-cli
+    pip install --upgrade pip
+    pip install git+https://github.com/mod-audio/mod-devel-cli
 
 Using uv:
 
