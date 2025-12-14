@@ -2,13 +2,13 @@
 
 ## Installation
 
-Using pip:
+Using pip3:
 
-    pip install git+https://github.com/moddevices/mod-devel-cli
+    pip3 install git+https://github.com/mod-audio/mod-devel-cli
 
 Using uv:
 
-    uv tool install git+https://github.com/moddevices/mod-devel-cli
+    uv tool install git+https://github.com/mod-audio/mod-devel-cli
 
 ## Usage
 
