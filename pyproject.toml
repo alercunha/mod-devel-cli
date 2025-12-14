@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mod-devel-cli"
-dynamic = ["version"]
+version = "2.0.0"
 description = "MOD Command Line Interface"
 authors = [
     {name = "Alex Cunha", email = "alex@mod.audio"}
@@ -31,5 +31,3 @@ Homepage = "https://mod.audio/"
 [project.scripts]
 modcli = "modcli.cli:main"
 
-[tool.setuptools.dynamic]
-version = {attr = "modcli.__version__"}
