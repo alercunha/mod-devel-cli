@@ -1,11 +1,11 @@
 import socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from importlib.metadata import version
 from urllib import parse
 
 import click
 from click import Abort
 
-from modcli import __version__
 from modcli import http
 
 
@@ -13,7 +13,7 @@ def login(username: str, password: str, api_url: str):
     result = http.post('{0}/users/tokens'.format(api_url), json_data={
         'user_id': username,
         'password': password,
-        'agent': 'modcli:{0}'.format(__version__),
+        'agent': 'modcli:{0}'.format(version('mod-devel-cli')),
     })
     if result.status_code != 200:
         raise Exception('Error: {0}'.format(result.json()['error-message']))

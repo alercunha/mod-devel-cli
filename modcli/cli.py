@@ -1,13 +1,14 @@
 import click
+from importlib.metadata import version
 
-from modcli import context, auth, __version__, bundle
+from modcli import context, auth, bundle
 
 _sso_disclaimer = '''SSO login requires you have a valid account in MOD Forum (https://forum.moddevices.com).
 If your browser has an active session the credentials will be used for this login. Confirm?'''
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
-@click.version_option(prog_name='modcli', version=__version__)
+@click.version_option(prog_name='modcli', version=version('mod-devel-cli'))
 def main():
     pass
 
