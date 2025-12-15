@@ -1,4 +1,5 @@
 import socket
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from importlib.metadata import version
 from urllib import parse
@@ -10,19 +11,19 @@ from modcli import http
 
 
 def login(username: str, password: str, api_url: str):
-    result = http.post('{0}/users/tokens'.format(api_url), json_data={
+    result = http.post(f'{api_url}/users/tokens', json_data={
         'user_id': username,
         'password': password,
-        'agent': 'modcli:{0}'.format(version('mod-devel-cli')),
+        'agent': f'modcli:{version("mod-devel-cli")}',
     })
     if result.status_code != 200:
-        raise Exception('Error: {0}'.format(result.json()['error-message']))
+        raise Exception(f'Error: {result.json()["error-message"]}')
     return result.json()['message'].strip()
 
 
 def get_open_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
+    s.bind(('', 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()
@@ -31,7 +32,7 @@ def get_open_port():
 
 def login_sso_detached(api_url: str):
     click.echo('Running in detached mode...')
-    click.echo('1) Open this url in any browser: {0}'.format('{0}/users/tokens_sso'.format(api_url)))
+    click.echo(f'1) Open this url in any browser: {api_url}/users/tokens_sso')
     click.echo('2) The URL will automatically redirect to MOD Forum (https://forum.moddevices.com)')
     click.echo('3) Once MOD Forum page loads, if asked, enter your credentials or register a new user')
     click.echo('4) A JWT token will be displayed in your browser')
@@ -39,13 +40,13 @@ def login_sso_detached(api_url: str):
         token = click.prompt('Copy the token value and paste it here, then press ENTER')
         return token.strip()
     except Abort:
-        exit(1)
+        sys.exit(1)
 
 
 def login_sso(api_url: str):
     server_host = 'localhost'
     server_port = get_open_port()
-    local_server = 'http://{0}:{1}'.format(server_host, server_port)
+    local_server = f'http://{server_host}:{server_port}'
 
     class SSORequestHandler(BaseHTTPRequestHandler):
         token = ''
@@ -73,14 +74,14 @@ def login_sso(api_url: str):
             '''
             return bytes(content, 'UTF-8')
 
-        def log_message(self, format, *args):
+        def log_message(self, fmt, *args):
             pass
 
     httpd = HTTPServer((server_host, server_port), SSORequestHandler)
     httpd.timeout = 30
 
     click.echo('Open this URL in your browser to authenticate:')
-    click.echo('{0}/users/tokens_sso?local_url={1}'.format(api_url, local_server))
+    click.echo(f'{api_url}/users/tokens_sso?local_url={local_server}')
 
     try:
         httpd.handle_request()

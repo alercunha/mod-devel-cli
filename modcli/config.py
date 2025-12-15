@@ -73,7 +73,7 @@ class CliContext(object):
 
     def _ensure_env(self, env_name: str):
         if env_name not in self.environments:
-            raise Exception('Environment {0} doen\'t exist'.format(env_name))
+            raise Exception(f'Environment {env_name} doesn\'t exist')
 
     def set_active_env(self, env_name: str):
         if not env_name:
@@ -86,11 +86,11 @@ class CliContext(object):
         if not env_name:
             raise Exception('Environment name is invalid')
         if env_name in self.environments:
-            raise Exception('Environment {0} already exists'.format(env_name))
+            raise Exception(f'Environment {env_name} already exists')
         if not re.match('https?://.*', api_url):
-            raise Exception('Invalid api_url: {0}'.format(api_url))
+            raise Exception(f'Invalid api_url: {api_url}')
         if not re.match('https?://.*', bundle_url):
-            raise Exception('Invalid api_url: {0}'.format(bundle_url))
+            raise Exception(f'Invalid api_url: {bundle_url}')
 
         self.environments[env_name] = EnvSettings(env_name, api_url, bundle_url)
 
