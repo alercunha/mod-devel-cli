@@ -7,7 +7,16 @@ _sso_disclaimer = '''SSO login requires you have a valid account in MOD Forum (h
 If your browser has an active session the credentials will be used for this login. Confirm?'''
 
 
-@click.group(context_settings=dict(help_option_names=['-h', '--help']))
+def _normalize_command_name(name):
+    return name.replace("_", "-")
+
+
+@click.group(context_settings=dict(
+    help_option_names=['-h', '--help'],
+    token_normalize_func=_normalize_command_name
+))
+
+
 @click.version_option(prog_name='modcli', version=version('mod-devel-cli'))
 def main():
     pass
@@ -33,7 +42,7 @@ def config_group():
 @click.option('-o', '--one-time', type=bool, help='Only print token once (do not store it)', is_flag=True)
 @click.option('-y', '--confirm-all', type=bool, help='Confirm all operations', is_flag=True)
 @click.option('-d', '--detached-mode', type=bool, help='Run process without opening a local browser', is_flag=True)
-@click.option('-e', '--env_name', type=str, help='Switch to environment before authenticating')
+@click.option('-e', '--env-name', type=str, help='Switch to environment before authenticating')
 def login_sso(show_token: bool, one_time: bool, confirm_all: bool, detached_mode: bool, env_name: str):
     if env_name:
         context.set_active_env(env_name)
@@ -70,7 +79,7 @@ def login_sso(show_token: bool, one_time: bool, confirm_all: bool, detached_mode
 @click.option('-p', '--password', type=str, prompt=True, hide_input=True, help='User password')
 @click.option('-s', '--show-token', type=bool, help='Print the JWT token obtained', is_flag=True)
 @click.option('-o', '--one-time', type=bool, help='Only print token once (do not store it)', is_flag=True)
-@click.option('-e', '--env_name', type=str, help='Switch to environment before authenticating')
+@click.option('-e', '--env-name', type=str, help='Switch to environment before authenticating')
 def login(username: str, password: str, show_token: bool, one_time: bool, env_name: str):
     if env_name:
         context.set_active_env(env_name)
@@ -106,7 +115,7 @@ def clear_context():
 
 
 @click.command(help='Show current active access JWT token')
-@click.option('-e', '--env_name', type=str, help='Show current active token from a specific environment')
+@click.option('-e', '--env-name', type=str, help='Show current active token from a specific environment')
 def active_token(env_name: str):
     if env_name:
         context.set_active_env(env_name)
@@ -121,7 +130,7 @@ def active_token(env_name: str):
 
 
 @click.command(help='Set active environment, where ENV_NAME is the name')
-@click.argument('env_name')
+@click.argument('env-name')
 def set_active_env(env_name: str):
     try:
         context.set_active_env(env_name)
@@ -136,9 +145,9 @@ def set_active_env(env_name: str):
 
 @click.command(help='Add new environment, where ENV_NAME is the name, API_URL '
                     'and BUNDLE_URL are the API entry points')
-@click.argument('env_name')
-@click.argument('api_url')
-@click.argument('bundle_url')
+@click.argument('env-name')
+@click.argument('api-url')
+@click.argument('bundle-url')
 def add_env(env_name: str, api_url: str, bundle_url: str):
     try:
         context.add_env(env_name, api_url, bundle_url)
