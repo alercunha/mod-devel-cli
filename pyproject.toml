@@ -28,6 +28,11 @@ classifiers = [
 [project.urls]
 Homepage = "https://mod.audio/"
 
+[project.optional-dependencies]
+dev = [
+    "pylint>=3.0",
+]
+
 [project.scripts]
 modcli = "modcli.cli:main"
 

@@ -20,17 +20,17 @@ def publish(project_file: str, packages_path: str, keep_environment: bool=False,
         raise Exception('You must authenticate first')
 
     if not os.path.isfile(project_file):
-        raise Exception('File {0} not found or not a valid file'.format(project_file))
+        raise Exception(f'File {project_file} not found or not a valid file')
 
     if packages_path:
         if not os.path.isdir(packages_path):
-            raise Exception('Packages path {0} not found'.format(packages_path))
+            raise Exception(f'Packages path {packages_path} not found')
     else:
         packages_path = os.path.dirname(project_file)
 
     project = os.path.split(project_file)[1]
-    if not force and not click.confirm('Project {0} will be compiled and published in [{1}], '
-                                       'do you confirm?'.format(click.style(project, fg='green'), click.style(env.name, fg='green'))):
+    if not force and not click.confirm(f'Project {click.style(project, fg="green")} will be compiled and published in [{click.style(env.name, fg="green")}], '
+                                       'do you confirm?'):
         raise Exception('Cancelled')
 
     process = read_json_file(project_file)
@@ -40,48 +40,48 @@ def publish(project_file: str, packages_path: str, keep_environment: bool=False,
         process['keep_environment'] = True
     process['rebuild'] = rebuild
     buildroot_pkg = process.pop('buildroot_pkg', None)
-    mk_filename = '{0}.mk'.format(buildroot_pkg)
+    mk_filename = f'{buildroot_pkg}.mk'
     if not buildroot_pkg:
         raise Exception('Missing buildroot_pkg in project file')
     if bundles:
         process['bundles'] = [b for b in process['bundles'] if b['name'] in bundles]
         if not process['bundles']:
-            raise Exception('Could not match any bundle from: {0}'.format(bundles))
+            raise Exception(f'Could not match any bundle from: {bundles}')
 
     # find buildroot_pkg under packages_path
     mk_path = next((i[0] for i in os.walk(packages_path) if mk_filename in i[2]), None)
     if not mk_path:
-        raise Exception('Could not find buildroot mk file for package {0} in {1}'.format(buildroot_pkg, packages_path))
+        raise Exception(f'Could not find buildroot mk file for package {buildroot_pkg} in {packages_path}')
     basename = os.path.basename(mk_path)
     if basename != buildroot_pkg:
-        raise Exception('The package folder containing the .mk file has to be named {0}'.format(buildroot_pkg))
+        raise Exception(f'The package folder containing the .mk file has to be named {buildroot_pkg}')
     pkg_path = os.path.dirname(mk_path)
 
     work_dir = tempfile.mkdtemp()
     try:
-        package = '{0}.tar.gz'.format(buildroot_pkg)
+        package = f'{buildroot_pkg}.tar.gz'
         source_path = os.path.join(work_dir, package)
         try:
             subprocess.check_output(
                 ['tar', 'zhcf', source_path, buildroot_pkg], stderr=subprocess.STDOUT, cwd=os.path.join(pkg_path)
             )
         except subprocess.CalledProcessError as ex:
-            raise Exception(ex.output.decode())
+            raise Exception(ex.output.decode()) from ex
 
-        click.echo('Submitting release process for project {0} using file {1}'.format(project_file, package))
-        click.echo('URL: {0}'.format(env.bundle_url))
+        click.echo(f'Submitting release process for project {project_file} using file {package}')
+        click.echo(f'URL: {env.bundle_url}')
 
-        headers = {'Authorization': 'MOD {0}'.format(env.token)}
+        headers = {'Authorization': f'MOD {env.token}'}
 
-        result = http.post('{0}/'.format(env.bundle_url), json_data=process, headers=headers)
+        result = http.post(f'{env.bundle_url}/', json_data=process, headers=headers)
         if result.status_code == 401:
             raise Exception('Invalid token - please authenticate (see \'modcli auth\')')
         elif result.status_code != 200:
-            raise Exception('Error: {0}'.format(result.text))
+            raise Exception(f'Error: {result.text}')
         release_process = result.json()
 
-        click.echo('Release process created: {0}'.format(release_process['id']))
-        click.echo('Uploading buildroot package {0} ...'.format(package))
+        click.echo(f'Release process created: {release_process["id"]}')
+        click.echo(f'Uploading buildroot package {package} ...')
         with open(source_path, 'rb') as fh:
             data = fh.read()
         headers = {'Content-Type': 'application/octet-stream'}
@@ -89,24 +89,24 @@ def publish(project_file: str, packages_path: str, keep_environment: bool=False,
         if result.status_code == 401:
             raise Exception('Invalid token - please authenticate (see \'modcli auth\')')
         elif result.status_code != 201:
-            raise Exception('Error: {0}'.format(result.text))
+            raise Exception(f'Error: {result.text}')
         checksum = result.text.lstrip('"').rstrip('"')
 
         result_checksum = md5(data).hexdigest()
         if checksum == result_checksum:
             click.echo('Checksum match ok!')
         else:
-            raise Exception('Checksum mismatch: {0} <> {1}'.format(checksum, result_checksum))
+            raise Exception(f'Checksum mismatch: {checksum} <> {result_checksum}')
     finally:
         click.echo('Cleaning up...')
         shutil.rmtree(work_dir, ignore_errors=True)
 
     release_process_url = release_process['href']
-    click.echo(click.style('Process url: {0}?pretty=true'.format(release_process_url), fg='blue'))
+    click.echo(click.style(f'Process url: {release_process_url}?pretty=true', fg='blue'))
     click.echo(click.style('Done', fg='green'))
     if show_result:
-        click.echo('Retrieving release process from {0} ...'.format(release_process_url))
-        release_process_full = http.get('{0}?pretty=true'.format(release_process_url)).text
-        click.echo(click.style('================ Release Process {0} ================'.format(release_process['id']), fg='blue'))
+        click.echo(f'Retrieving release process from {release_process_url} ...')
+        release_process_full = http.get(f'{release_process_url}?pretty=true').text
+        click.echo(click.style(f'================ Release Process {release_process["id"]} ================', fg='blue'))
         click.echo(release_process_full)
         click.echo(click.style('================ End Release Process ================', fg='blue'))

@@ -1,3 +1,5 @@
+import sys
+
 import click
 from importlib.metadata import version
 
@@ -8,7 +10,7 @@ If your browser has an active session the credentials will be used for this logi
 
 
 def _normalize_command_name(name):
-    return name.replace("_", "-")
+    return name.replace('_', '-')
 
 
 @click.group(context_settings=dict(
@@ -50,9 +52,9 @@ def login_sso(show_token: bool, one_time: bool, confirm_all: bool, detached_mode
     if not confirm_all:
         response = click.confirm(_sso_disclaimer)
         if not response:
-            exit(1)
+            sys.exit(1)
     if not one_time:
-        click.echo('Logging in to [{0}]...'.format(env.name))
+        click.echo(f'Logging in to [{env.name}]...')
 
     try:
         if detached_mode:
@@ -61,7 +63,7 @@ def login_sso(show_token: bool, one_time: bool, confirm_all: bool, detached_mode
             token = auth.login_sso(env.api_url)
     except Exception as ex:
         click.echo(click.style(str(ex), fg='red'), err=True)
-        exit(1)
+        sys.exit(1)
         return
 
     if not one_time:
@@ -71,7 +73,7 @@ def login_sso(show_token: bool, one_time: bool, confirm_all: bool, detached_mode
     if show_token or one_time:
         print(token.strip())
     else:
-        click.echo(click.style('You\'re now logged in as [{0}] in [{1}].'.format(env.username, env.name), fg='green'))
+        click.echo(click.style(f'You\'re now logged in as [{env.username}] in [{env.name}].', fg='green'))
 
 
 @click.command(help='Authenticate user')
@@ -85,12 +87,12 @@ def login(username: str, password: str, show_token: bool, one_time: bool, env_na
         context.set_active_env(env_name)
     env = context.current_env()
     if not one_time:
-        click.echo('Logging in to [{0}]...'.format(env.name))
+        click.echo(f'Logging in to [{env.name}]...')
     try:
         token = auth.login(username, password, env.api_url)
     except Exception as ex:
         click.echo(click.style(str(ex), fg='red'), err=True)
-        exit(1)
+        sys.exit(1)
         return
 
     if not one_time:
@@ -100,7 +102,7 @@ def login(username: str, password: str, show_token: bool, one_time: bool, env_na
     if show_token or one_time:
         print(token.strip())
     else:
-        click.echo(click.style('You\'re now logged in as [{0}] in [{1}].'.format(username, env.name), fg='green'))
+        click.echo(click.style(f'You\'re now logged in as [{username}] in [{env.name}].', fg='green'))
 
 
 @click.command(help='Remove all tokens and reset context data')
@@ -109,7 +111,7 @@ def clear_context():
         context.clear()
     except Exception as ex:
         click.echo(click.style(str(ex), fg='red'), err=True)
-        exit(1)
+        sys.exit(1)
         return
     click.echo(click.style('Context cleared', fg='green'))
 
@@ -123,7 +125,7 @@ def active_token(env_name: str):
     if not token:
         click.echo(click.style('You must authenticate first.', fg='red'), err=True)
         click.echo('Try:\n $ modcli auth login')
-        exit(1)
+        sys.exit(1)
         return
 
     click.echo(token)
@@ -137,10 +139,10 @@ def set_active_env(env_name: str):
         context.save()
     except Exception as ex:
         click.echo(click.style(str(ex), fg='red'), err=True)
-        exit(1)
+        sys.exit(1)
         return
 
-    click.echo(click.style('Current environment set to: {0}'.format(env_name), fg='green'))
+    click.echo(click.style(f'Current environment set to: {env_name}', fg='green'))
 
 
 @click.command(help='Add new environment, where ENV_NAME is the name, API_URL '
@@ -155,18 +157,18 @@ def add_env(env_name: str, api_url: str, bundle_url: str):
         context.save()
     except Exception as ex:
         click.echo(click.style(str(ex), fg='red'), err=True)
-        exit(1)
+        sys.exit(1)
         return
 
-    click.echo(click.style('Environment [{0}] added and set as active'.format(env_name), fg='green'))
+    click.echo(click.style(f'Environment [{env_name}] added and set as active', fg='green'))
 
 
 @click.command(help='List current configuration', name='list')
 def list_config():
     env = context.current_env()
-    click.echo('Active environment: {0}'.format(env.name))
-    click.echo('Authenticated in [{0}]: {1}'.format(env.name, 'Yes' if env.token else 'No'))
-    click.echo('Registered environments: {0}'.format(list(context.environments.keys())))
+    click.echo(f'Active environment: {env.name}')
+    click.echo(f'Authenticated in [{env.name}]: {"Yes" if env.token else "No"}')
+    click.echo(f'Registered environments: {list(context.environments.keys())}')
 
 
 @click.command(help='Publish LV2 bundles, where PROJECT_FILE points to the buildroot project descriptor file (JSON)')
@@ -184,7 +186,7 @@ def publish(project_file: str, packages_path: str, show_result: bool, keep_envir
                        keep_environment=keep_environment, rebuild=rebuild, env_name=env, force=force)
     except Exception as ex:
         click.echo(click.style(str(ex), fg='red'), err=True)
-        exit(1)
+        sys.exit(1)
         return
 
 
