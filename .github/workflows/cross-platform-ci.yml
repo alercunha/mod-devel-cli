@@ -1,4 +1,4 @@
-name: Test
+name: Cross-platform CI
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-15-intel, windows-latest]
+        os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, macos-latest, macos-15-intel, windows-latest]
         python-version: ['3.10', '3.11', '3.12']
 
     steps:
@@ -28,8 +28,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install .
 
-      - name: Test CLI version
-        run: modcli --version
+      - name: Verify installed version matches source
+        run: |
+          python -c "
+          import re
+          from importlib.metadata import version
+          with open('pyproject.toml') as f:
+              match = re.search(r'version\s*=\s*[\"'']([^\"'']+)[\"'']', f.read())
+          expected = match.group(1)
+          installed = version('mod-devel-cli')
+          print(f'Expected: {expected}')
+          print(f'Installed: {installed}')
+          assert expected == installed, f'Version mismatch: {expected} != {installed}'
+          "
+        shell: bash
 
       - name: Test CLI help
         run: modcli --help
